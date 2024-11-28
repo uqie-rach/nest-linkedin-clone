@@ -9,6 +9,11 @@ import { CreateUserDto, UpdateUserDto } from 'contracts/dto/user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
+  @MessagePattern('users.validate')
+  async validateUser(@Payload() id: string) {
+    return this.usersService.validate(id);
+  }
+
   @MessagePattern('users.register')
   async register(@Payload() createUserDto: CreateUserDto) {
     return this.usersService.register(createUserDto);

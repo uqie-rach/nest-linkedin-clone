@@ -22,6 +22,19 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
+  
+  async validate(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { _id: new ObjectId(id) },
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    return true;
+  }
+
   async register(createUserDto: CreateUserDto) {
     const isUserExist = await this.userRepository.findOne({
       where: { email: createUserDto.email },
@@ -95,6 +108,7 @@ export class UsersService {
     });
 
     if (!user) {
+      console.log('[UsersService] User not found');
       throw new RpcException(new NotFoundException('User not found'));
     }
 
