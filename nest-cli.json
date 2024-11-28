@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
+    },
+    "posts": {
+      "type": "application",
+      "root": "apps/posts",
+      "entryFile": "main",
+      "sourceRoot": "apps/posts/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/posts/tsconfig.app.json"
+      }
     }
   }
 }
