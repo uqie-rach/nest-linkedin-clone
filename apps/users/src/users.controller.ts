@@ -3,7 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ObjectId } from 'typeorm';
 
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from 'contracts/user.dto';
+import { CreateUserDto, UpdateUserDto } from 'contracts/dto/user.dto';
 
 @Controller()
 export class UsersController {
