@@ -1,14 +1,14 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ClientsModule } from '@nestjs/microservices';
 
-import { UsersService } from './users.service';
+import { PostsService } from './posts.service';
 import { ApiGatewayModule } from '../api-gateway.module';
 
 @Module({
-  imports: [
+  imports: [ 
     forwardRef(() => ApiGatewayModule)
   ],
-  providers: [UsersService],
+  providers: [PostsService],
   exports: [ClientsModule]
 })
-export class UsersModule {}
+export class PostsModule {}
