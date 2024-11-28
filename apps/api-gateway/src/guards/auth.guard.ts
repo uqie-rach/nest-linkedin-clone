@@ -21,6 +21,7 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
+      console.log('[AuthGuard] No token found');
       throw new UnauthorizedException();
     }
 
@@ -30,8 +31,11 @@ export class AuthGuard implements CanActivate {
       });
 
       const params = request.params?.id;
+      const idDoesNotMatch: Boolean = payload.id !== params;
+      const isNotAdmin: Boolean = payload.role !== 'admin';
 
-      if (params && payload.id !== params) {
+      if (idDoesNotMatch && isNotAdmin) {
+        console.log('[AuthGuard] User ID does not match and is not an admin');
         return false;
       }
 
@@ -39,6 +43,7 @@ export class AuthGuard implements CanActivate {
       // so that we can access it in our route handlers
       request['user'] = payload;
     } catch {
+      console.log('[AuthGuard] Invalid token');
       throw new ForbiddenException();
     }
     return true;

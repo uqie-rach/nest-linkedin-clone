@@ -1,3 +1,4 @@
+import { Role } from 'contracts/enum/enums';
 import { Entity, ObjectIdColumn, ObjectId, Column } from 'typeorm';
 
 @Entity()
@@ -26,6 +27,6 @@ export class User {
   @Column()
   occupation: string;
 
-  @Column({ default: 'user' })
-  role: string;
+  @Column({ default: Role.User })
+  role: Role;
 }

@@ -2,7 +2,7 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
-import { CreateUserDto, UpdateUserDto } from 'contracts/user.dto';
+import { CreateUserDto, UpdateUserDto } from 'contracts/dto/user.dto';
 
 @Injectable()
 export class UsersService {
