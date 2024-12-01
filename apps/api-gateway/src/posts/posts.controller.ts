@@ -32,9 +32,7 @@ export class PostsController {
   findAll() {
     return this.postsService.findAll();
   }
-
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User)
+  
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.postsService.findOne(id);
