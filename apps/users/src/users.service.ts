@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 import { User } from './entities/user.entity';
-import { CreateUserDto, UpdateUserDto } from 'contracts/dto/user.dto';
+import { CreateUserDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
 import { Role } from 'contracts/enum/enums';
 
 @Injectable()
@@ -56,7 +56,12 @@ export class UsersService {
     return { message: 'User created successfully', statusCode: 201, error: false };
   }
   
-  async login(email: string, password: string) {
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+
+    console.log('[UsersService] loginDto', loginDto);
+    
     const user = await this.userRepository.findOne({
       where: { email },
     });

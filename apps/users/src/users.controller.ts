@@ -3,7 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ObjectId } from 'typeorm';
 
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from 'contracts/dto/user.dto';
+import { CreateUserDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
 
 @Controller()
 export class UsersController {
@@ -20,9 +20,8 @@ export class UsersController {
   }
 
   @MessagePattern('users.login')
-  async login(@Payload() body: { email: string; password: string }) {
-    const { email, password } = body;
-    return this.usersService.login(email, password);
+  async login(@Payload() loginDto: LoginDto) {
+    return this.usersService.login(loginDto);
   }
 
   @MessagePattern('users.findAll')

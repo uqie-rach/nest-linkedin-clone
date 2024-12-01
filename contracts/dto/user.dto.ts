@@ -46,11 +46,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   phone?: string;
-
-  @IsOptional()
-  @IsString()
-  password?: string;
-
+  
   @IsOptional()
   @IsString()
   location?: string;
@@ -93,5 +89,16 @@ export class CreateUserDto {
 
 export class FindOneDto { 
   @IsString()
+  @IsNotEmpty()
   id: string;
+}
+
+export class LoginDto { 
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 }
