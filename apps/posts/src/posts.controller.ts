@@ -3,11 +3,21 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { PostsService } from './posts.service';
-import { CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
+import { AddCommentDto, CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
 
 @Controller()
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
+
+  @MessagePattern('posts.addComment')
+  addComment(@Payload() { postId, commentId }: AddCommentDto) {
+    return this.postsService.addComment(postId, commentId);
+  }
+
+  @MessagePattern('posts.removeComment')
+  removeComment(@Payload() { postId, commentId }: AddCommentDto) {
+    return this.postsService.removeComment(postId, commentId);
+  }
 
   @MessagePattern('posts.create')
   create(@Payload() createPostDto: CreatePostDto) {
