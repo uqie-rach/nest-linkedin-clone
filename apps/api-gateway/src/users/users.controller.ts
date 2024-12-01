@@ -12,10 +12,10 @@ import {
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
-import { CreateUserDto, FindOneDto, UpdateUserDto } from 'contracts/dto/user.dto';
+import { CreateUserDto, FindOneDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { Role } from '../../../../contracts/enum/enums';
+import { Role } from 'contracts/enum/enums';
 import { RolesGuard } from '../guards/role.guard';
 
 @Controller('users')
@@ -29,9 +29,8 @@ export class UsersController {
   }
   
   @Post('auth/login')
-  async login(@Body() body: { email: string; password: string }) {
-    const { email, password } = body;
-    return this.usersService.login(email, password);
+  async login(@Body() loginDto: LoginDto) {;
+    return this.usersService.login(loginDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

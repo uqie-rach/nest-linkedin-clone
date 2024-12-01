@@ -30,15 +30,6 @@ export class AuthGuard implements CanActivate {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
-      const params = request.params?.id;
-      const idDoesNotMatch: Boolean = payload.id !== params;
-      const isNotAdmin: Boolean = payload.role !== 'admin';
-
-      if (idDoesNotMatch && isNotAdmin) {
-        console.log('[AuthGuard] User ID does not match and is not an admin');
-        return false;
-      }
-
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = payload;
