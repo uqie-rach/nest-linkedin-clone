@@ -1,7 +1,7 @@
 // apps/posts/src/entities/post.entity.ts
-import { Entity, ObjectIdColumn, ObjectId, Column } from 'typeorm';
+import { Entity, ObjectIdColumn, ObjectId, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('posts')
 export class Post {
   @ObjectIdColumn()
   _id: ObjectId;
@@ -19,9 +19,15 @@ export class Post {
   // tag: ObjectId[]; // Array of IDs referencing other users
   tag: string[]; // Array of IDs referencing other users
 
-  @Column({ default: new Date() })
+  @Column({ type:  'array' })
+  likes: ObjectId[]; // Array of IDs referencing users who liked the
+
+  @Column({ type:  'array' })
+  comments: ObjectId[]; // Array of IDs referencing comments
+
+  @CreateDateColumn({ default: new Date() })
   createdAt: Date;
 
-  @Column({ default: new Date() })
+  @UpdateDateColumn({ default: new Date() })
   updatedAt: Date;
 }
