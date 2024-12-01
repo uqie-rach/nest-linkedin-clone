@@ -1,6 +1,30 @@
 // contracts/post.dto.ts
-import { IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsDateString } from 'class-validator';
 import { ObjectId } from 'mongodb';
+
+export class PostDto { 
+  @IsString()
+  _id: string;
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  content: string;
+
+  @IsString()
+  userId: string;
+
+  @IsArray()
+  // tag?: ObjectId[]; // Optional field for tagging users
+  tag?: string[]; // Optional field for tagging users
+
+  @IsDateString()
+  createdAt: string;
+
+  @IsDateString()
+  updatedAt: string;
+}
 
 export class CreatePostDto {
   @IsString()
@@ -17,7 +41,6 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsArray()
-  // tag?: ObjectId[]; // Optional field for tagging users
   tag?: string[]; // Optional field for tagging users
 }
 
@@ -34,4 +57,12 @@ export class UpdatePostDto {
   @IsArray()
   // tag?: ObjectId[];
   tag?: string[];
+}
+
+export class AddCommentDto {
+  @IsString()
+  postId: string;
+
+  @IsString()
+  commentId: string;
 }

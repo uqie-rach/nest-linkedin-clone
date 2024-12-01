@@ -13,6 +13,7 @@ import { CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
 export class PostsService {
   constructor(
     @Inject('POSTS_CLIENT') private postsClient: ClientProxy,
+    @Inject('COMMENTS_CLIENT') private commentsClient: ClientProxy,
     @Inject('USERS_CLIENT') private usersClient: ClientProxy,
   ) {}
 
@@ -96,6 +97,11 @@ export class PostsService {
 
   async remove(id: string) {
     try {
+      // remove comments first
+      await firstValueFrom(
+        this.commentsClient.send('comments.remove', { postId: id }),
+      );
+
       const response = await firstValueFrom(
         this.postsClient.send('posts.remove', id),
       );

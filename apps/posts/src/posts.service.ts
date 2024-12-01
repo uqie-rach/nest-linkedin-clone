@@ -27,8 +27,8 @@ export class PostsService {
       ...createPostDto,
       userId: new ObjectId(userId),
       tag,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      comments: [],
+      likes: [],
     });
     return this.postRepository.save(post);
   }
@@ -39,7 +39,7 @@ export class PostsService {
     });
 
     if (!post) {
-      throw new NotFoundException('Post not found');
+      throw new RpcException(new NotFoundException('Post not found'));
     }
 
     const updatedData = {
@@ -80,5 +80,33 @@ export class PostsService {
 
     await this.postRepository.delete(id);    
     return { message: 'Post deleted successfully' };
+  }
+
+  async addComment(postId: string, commentId: string) {
+    const post = await this.postRepository.findOne({
+      where: { _id: new ObjectId(postId) },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    post.comments.push(new ObjectId(commentId));
+    await this.postRepository.save(post);
+    return { message: 'Comment added successfully' };
+  }
+
+  async removeComment(postId: string, commentId: string) {
+    const post = await this.postRepository.findOne({
+      where: { _id: new ObjectId(postId) },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    post.comments = post.comments.filter((id) => id.toString() !== commentId);
+    await this.postRepository.save(post);
+    return { message: 'Comment removed successfully' };
   }
 }
