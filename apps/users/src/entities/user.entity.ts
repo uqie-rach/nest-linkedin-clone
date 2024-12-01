@@ -1,7 +1,7 @@
 import { Role } from 'contracts/enum/enums';
-import { Entity, ObjectIdColumn, ObjectId, Column } from 'typeorm';
+import { Entity, ObjectIdColumn, ObjectId, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User {
   @ObjectIdColumn()
   _id: ObjectId;
@@ -29,4 +29,10 @@ export class User {
 
   @Column({ default: Role.User })
   role: Role;
+
+  @CreateDateColumn({ default: Date.now() })
+  createdAt: Date;
+  
+  @UpdateDateColumn({ default: Date.now() })
+  updatedAt: Date;
 }
