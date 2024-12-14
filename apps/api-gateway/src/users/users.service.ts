@@ -2,7 +2,7 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
-import { CreateUserDto, UpdateUserDto } from 'contracts/dto/user.dto';
+import { CreateUserDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -44,8 +44,10 @@ export class UsersService {
     }
   }
   
-  async login(email: string, password: string) {
+  async login(loginDto: LoginDto) {
     try {
+      const { email, password } = loginDto;
+      
       const response = await firstValueFrom(
         this.usersClient.send('users.login', { email, password }),
       );
