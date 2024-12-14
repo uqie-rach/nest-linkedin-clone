@@ -8,8 +8,12 @@ import { UsersService } from './users/users.service';
 
 import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
+
 import { PostsService } from './posts/posts.service';
 import { PostsController } from './posts/posts.controller';
+
+import { CommentsController } from './comments/comments.controller';
+import { CommentsService } from './comments/comments.service';
 
 @Module({
   imports: [
@@ -31,15 +35,30 @@ import { PostsController } from './posts/posts.controller';
         },
       },
     ]),
+    ClientsModule.register([
+      {
+        name: 'COMMENTS_CLIENT',
+        transport: Transport.TCP,
+        options: {
+          port: 3003,
+        },
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
   ],
-  controllers: [ApiGatewayController, UsersController, PostsController],
+  controllers: [
+    ApiGatewayController,
+    UsersController,
+    PostsController,
+    CommentsController,
+  ],
   providers: [
     ApiGatewayService,
     UsersService,
     PostsService,
+    CommentsService,
     JwtService,
     ConfigService,
   ],

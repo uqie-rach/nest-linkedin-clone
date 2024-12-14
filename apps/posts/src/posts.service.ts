@@ -83,6 +83,8 @@ export class PostsService {
   }
 
   async addComment(postId: string, commentId: string) {
+
+    console.log('[PostsService] addComment:', postId, commentId);
     const post = await this.postRepository.findOne({
       where: { _id: new ObjectId(postId) },
     });
