@@ -12,8 +12,13 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 import { User } from './entities/user.entity';
-import { CreateUserDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
-import { Role } from 'contracts/enum/enums';
+import {
+  CreateUserDto,
+  FindOneDto,
+  LoginDto,
+  UpdateUserDto,
+} from 'contracts/dto/user.dto';
+import { Role } from '../../../contracts/enum/enums';
 
 @Injectable()
 export class UsersService {
@@ -22,7 +27,6 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  
   async validate(id: string) {
     const user = await this.userRepository.findOne({
       where: { _id: new ObjectId(id) },
@@ -48,40 +52,52 @@ export class UsersService {
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
-      role: Role.User, 
+      role: Role.User,
     });
-    
+
     await this.userRepository.save(user);
-    
-    return { message: 'User created successfully', statusCode: 201, error: false };
+
+    return {
+      message: 'User created successfully',
+      statusCode: 201,
+      error: false,
+    };
   }
-  
+
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-
     console.log('[UsersService] loginDto', loginDto);
-    
+
     const user = await this.userRepository.findOne({
       where: { email },
     });
-    
+
     if (!user) {
       throw new RpcException(new NotFoundException('User Not Found!'));
     }
-    
+
+    if (!password)
+      throw new RpcException(new BadRequestException('Password is required'));
+
     const { password: userPassword, ...rest } = user;
     const isPasswordMatch = await bcrypt.compare(password, userPassword);
-    
+
     if (!isPasswordMatch) {
-      throw new RpcException(new BadRequestException('Email or Password is incorrect'));
+      throw new RpcException(
+        new BadRequestException('Email or Password is incorrect'),
+      );
     }
 
-    const token = this.jwtService.sign({ email: user.email, id: user._id, role: user.role });
+    const token = this.jwtService.sign({
+      email: user.email,
+      id: user._id,
+      role: user.role,
+    });
 
     return { token, user: rest };
   }
-  
+
   async create(createUserDto: CreateUserDto) {
     const isUserExist = await this.userRepository.findOne({
       where: { email: createUserDto.email },
@@ -92,12 +108,12 @@ export class UsersService {
     if (isUserExist) {
       throw new RpcException(new ConflictException('User already exists'));
     }
-    
+
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
-      role: Role.User, 
+      role: Role.User,
     });
 
     return this.userRepository.save(user);
@@ -107,10 +123,32 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async findOne(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { _id: new ObjectId(id) },
+  async findOne(query: FindOneDto) {
+    let user: User | null = null;
+
+    if (query.email) {
+    user = await this.userRepository.findOne({
+      where: {
+        email: query.email,
+      },
+      select: [
+        '_id',
+        'email',
+        'firstName',
+        'lastName',
+        'phone',
+        'location',
+        'occupation',
+        'role',
+      ],
     });
+
+    console.log(user)
+    } else {
+      user = await this.userRepository.findOne({
+        where: { _id: new ObjectId(query.id) },
+      });
+    }
 
     if (!user) {
       console.log('[UsersService] User not found');

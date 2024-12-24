@@ -17,11 +17,11 @@ import {
   FindAllQueryParamDto,
   RemoveCommentDto,
   UpdateCommentDto,
-} from 'contracts/dto/comment.dto';
+} from '../../../../contracts/dto/comment.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { RolesGuard } from '../guards/role.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { Role } from 'contracts/enum/enums';
+import { Role } from '../../../../contracts/enum/enums';
 
 @Controller('comments')
 export class CommentsController {

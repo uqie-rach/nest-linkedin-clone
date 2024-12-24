@@ -2,12 +2,17 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
-import { CreateUserDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
+import {
+  CreateUserDto,
+  FindOneDto,
+  LoginDto,
+  UpdateUserDto,
+} from '../../../../contracts/dto/user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(@Inject('USERS_CLIENT') private usersClient: ClientProxy) {}
-  
+
   async create(createUserDto: CreateUserDto) {
     try {
       const response = await firstValueFrom(
@@ -25,7 +30,7 @@ export class UsersService {
       throw new HttpException('Internal server error', 500);
     }
   }
-  
+
   async register(createUserDto: CreateUserDto) {
     try {
       const response = await firstValueFrom(
@@ -43,11 +48,11 @@ export class UsersService {
       throw new HttpException('Internal server error', 500);
     }
   }
-  
+
   async login(loginDto: LoginDto) {
     try {
       const { email, password } = loginDto;
-      
+
       const response = await firstValueFrom(
         this.usersClient.send('users.login', { email, password }),
       );
@@ -68,10 +73,11 @@ export class UsersService {
     return this.usersClient.send('users.findAll', {});
   }
 
-  async findOne(id: string) {
+  async findOne(params: FindOneDto) {
+    console.log('[findOne] params', params);
     try {
       const response = await firstValueFrom(
-        this.usersClient.send('users.findOne', id),
+        this.usersClient.send('users.findOne', params),
       );
       return response;
     } catch (error) {

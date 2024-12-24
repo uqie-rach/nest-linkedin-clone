@@ -7,7 +7,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
-import { CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
+import { CreatePostDto, UpdatePostDto } from '../../../../contracts/dto/post.dto';
 
 @Injectable()
 export class PostsService {

@@ -3,12 +3,12 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ObjectId } from 'typeorm';
 
 import { UsersService } from './users.service';
-import { CreateUserDto, LoginDto, UpdateUserDto } from 'contracts/dto/user.dto';
+import { CreateUserDto, FindOneDto, LoginDto, UpdateUserDto } from '../../../contracts/dto/user.dto';
 
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  
+
   @MessagePattern('users.validate')
   async validateUser(@Payload() id: string) {
     return this.usersService.validate(id);
@@ -30,8 +30,9 @@ export class UsersController {
   }
 
   @MessagePattern('users.findOne')
-  findOne(@Payload() id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Payload() query: FindOneDto) {
+    console.log('[findOne] query', query);
+    return this.usersService.findOne(query);
   }
 
   @MessagePattern('users.create')
