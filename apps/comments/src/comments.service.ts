@@ -10,7 +10,7 @@ import {
   FindAllQueryParamDto,
   RemoveCommentDto,
   UpdateCommentDto,
-} from 'contracts/dto/comment.dto';
+} from '../../../contracts/dto/comment.dto';
 
 @Injectable()
 export class CommentsService {

@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { RpcException } from '@nestjs/microservices';
 
 import { Post } from './entities/post.entity';
-import { CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
+import { CreatePostDto, UpdatePostDto } from '../../../contracts/dto/post.dto';
 
 @Injectable()
 export class PostsService {

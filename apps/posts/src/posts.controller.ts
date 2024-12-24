@@ -3,7 +3,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { PostsService } from './posts.service';
-import { AddCommentDto, CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
+import { AddCommentDto, CreatePostDto, UpdatePostDto } from '../../../contracts/dto/post.dto';
 
 @Controller()
 export class PostsController {

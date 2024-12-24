@@ -10,11 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { CreatePostDto, UpdatePostDto } from 'contracts/dto/post.dto';
+import { CreatePostDto, UpdatePostDto } from '../../../../contracts/dto/post.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { RolesGuard } from '../guards/role.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { Role } from 'contracts/enum/enums';
+import { Role } from '../../../../contracts/enum/enums';
 
 @Controller('posts')
 export class PostsController {

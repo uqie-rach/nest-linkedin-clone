@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class UserDto {
   @IsOptional()
@@ -46,7 +46,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   phone?: string;
-  
+
   @IsOptional()
   @IsString()
   location?: string;
@@ -66,7 +66,8 @@ export class CreateUserDto {
   lastName: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsEmail()
   email: string;
 
   @IsString()
@@ -87,13 +88,17 @@ export class CreateUserDto {
 }
 
 
-export class FindOneDto { 
+export class FindOneDto {
   @IsString()
-  @IsNotEmpty()
-  id: string;
+  @IsOptional()
+  id?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 }
 
-export class LoginDto { 
+export class LoginDto {
   @IsString()
   @IsNotEmpty()
   email: string;

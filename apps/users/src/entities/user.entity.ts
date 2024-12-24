@@ -1,4 +1,4 @@
-import { Role } from 'contracts/enum/enums';
+import { Role } from '../../../../contracts/enum/enums';
 import { Entity, ObjectIdColumn, ObjectId, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
