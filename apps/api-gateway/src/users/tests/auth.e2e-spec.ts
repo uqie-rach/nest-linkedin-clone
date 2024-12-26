@@ -7,6 +7,7 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from '../../../../users/src/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 
 let registerPayload = {
   MATCH: {
@@ -83,6 +84,7 @@ describe('Users Microservice - E2E Register Test', () => {
       options: { port: 3000 }, // Port gateway
     });
 
+    // Enable Validation Pipe
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -209,23 +211,31 @@ describe('Users Microservice - E2E Login Test', () => {
 
 describe('Users Microservice - E2E Users Endpoint Test', () => {
   let app: INestApplication;
-  let token: string = '';
-  let payload = null;
 
-  let loginPayload = {
+  let userPayload = {
     admin: {
-      _id: '675eb54df7f153371abeaf4b',
+      _id: '676d0a1b3e2482f102a2d3e2',
       email: 'admin.work@gmail.com',
       password: 'password',
     },
     user: {
       email: 'user.test@gmail.com',
       password: 'password',
+      firstName: 'user',
+      lastName: 'test',
+      phone: '(+62) 81234567890',
+      location: 'Malang',
+      occupation: 'Software Engineer',
     },
-  };
-
-  let mockUser = {
-    _id: '676ac870dd8c4df4b8f00f9a',
+    newUser: {
+      email: 'uqie.work@gmail.com',
+      password: 'password',
+      firstName: 'uqie',
+      lastName: 'rach',
+      phone: '(+62) 81234567890',
+      location: 'Malang',
+      occupation: 'Software Engineer',
+    },
   };
 
   beforeAll(async () => {
@@ -265,27 +275,193 @@ describe('Users Microservice - E2E Users Endpoint Test', () => {
       options: { port: 3000 }, // Port gateway
     });
 
+    // Enable Validation Pipe
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+
     await app.startAllMicroservices();
     await app.init();
 
     const dataSource = moduleFixture.get<DataSource>(DataSource);
     userRepository = dataSource.getRepository(User);
-
-    const response = await request(app.getHttpServer())
-      .post('/users/auth/login') // Endpoint Gateway API
-      .send(loginPayload.user)
-      .expect(200); // Expected HTTP Status
-
-    payload = response.body.user;
-    token = response.body.token;
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  beforeEach(async () => {});
+  beforeEach(async () => {
+    await deleteUser(null, userPayload.user.email);
+    await deleteUser(null, userPayload.newUser.email);
+    await createUser(userPayload.user);
+  });
 
+  afterEach(async () => {
+    await deleteUser(null, userPayload.user.email);
+    await deleteUser(null, userPayload.newUser.email);
+  });
+
+  // Functions
+  async function loginAsUserOrAdmin(
+    option: string,
+  ): Promise<{ token: string; payload: any }> {
+    let choosen;
+    switch (option) {
+      case 'admin':
+        choosen = userPayload.admin;
+        break;
+      case 'user':
+        choosen = userPayload.user;
+        break;
+      default:
+        choosen = userPayload.user;
+        break;
+    }
+
+    const response = await request(app.getHttpServer())
+      .post('/users/auth/login') // Endpoint Gateway API
+      .send({
+        email: choosen.email,
+        password: choosen.password,
+      });
+
+    return {
+      token: response.body.token,
+      payload: response.body.user,
+    };
+  }
+
+  async function deleteUser(_id?: string, email?: string) {
+    return await userRepository.delete({ email });
+  }
+
+  async function createUser(data: any): Promise<any> {
+    const { password, ...left } = data;
+    const user = userRepository.create({
+      ...left,
+      password: await bcrypt.hash(password, 10),
+      role: 'user',
+    });
+    return await userRepository.save(user);
+  }
+
+  // CREATE
+  it('should return 403 if user is not an admin', async () => {
+    // Login as user
+    const { token } = await loginAsUserOrAdmin('user');
+
+    const user = await request(app.getHttpServer())
+      .post(`/users`)
+      .send(userPayload.newUser)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403);
+
+    return user;
+  });
+
+  it('should return 400 for the missing attributes', async () => {
+    // login as admin
+    const { token } = await loginAsUserOrAdmin('admin');
+
+    // Create new user
+    const user = await request(app.getHttpServer())
+      .post(`/users`)
+      .send({
+        email: userPayload.newUser.email,
+        password: userPayload.newUser.password,
+      })
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
+
+    return user;
+  });
+
+  it('should return 201 after creating new user', async () => {
+    // login as admin
+    const { token } = await loginAsUserOrAdmin('admin');
+
+    // Create new user
+    const user = await request(app.getHttpServer())
+      .post(`/users`)
+      .send(userPayload.newUser)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(201);
+
+    return user;
+  });
+
+  it('should return 409 for duplicate entry', async () => {
+    // login as admin, then retrieve token
+    const { token } = await loginAsUserOrAdmin('admin');
+
+    // Create new user
+    // await createUser(userPayload.newUser);
+    await request(app.getHttpServer())
+      .post(`/users`)
+      .send(userPayload.newUser)
+      .set('Authorization', `Bearer ${token}`);
+
+    const user = await request(app.getHttpServer())
+      .post(`/users`)
+      .send(userPayload.newUser)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(409);
+
+    return user;
+  });
+
+  // GET by ID
+  it('should return 200 when accessing its own data', async () => {
+    // Create new user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    const user = await request(app.getHttpServer())
+      .get(`/users/${payload._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    return user;
+  });
+
+  it('should return 403 forbidden when accessing other user data', async () => {
+    // Login as user
+    const { token } = await loginAsUserOrAdmin('user');
+
+    // Login as admin
+    const { payload } = await loginAsUserOrAdmin('admin');
+
+    // Try to access admin data
+    const user = await request(app.getHttpServer())
+      .get(`/users/${userPayload.admin._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403);
+
+    return user;
+  });
+
+  it('should return 404 if user not found', async () => {
+    // Login as user
+      const { token, payload } = await loginAsUserOrAdmin('user');
+
+    // delete user
+    await deleteUser(null, payload.email);
+
+    const user = await request(app.getHttpServer())
+      .get(`/users/${payload._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.message).toBe('User not found');
+      });
+
+    return user;
+  });
+
+  // GET all
   it('should return 401 unauthorized when accessing users data', async () => {
     const user = await request(app.getHttpServer())
       .get('/users')
@@ -296,38 +472,84 @@ describe('Users Microservice - E2E Users Endpoint Test', () => {
     return user;
   });
 
-  it('should return 200 when accessing its own data', async () => {
-    console.log('here', payload, token);
+  it('should return 200 when admin accessing users data', async () => {
+    // Login as admin
+    const { token } = await loginAsUserOrAdmin('admin');
+
     const user = await request(app.getHttpServer())
-      .get(`/users/${payload._id}`)
+      .get('/users')
       .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+      .expect((res) => {
+        expect(res.status).toBe(200);
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
     return user;
   });
 
-  it('should return 403 forbidden when accessing other user data', async () => {
-    const user = await request(app.getHttpServer())
-      .get(`/users/${loginPayload.admin._id}`)
-      .set('Authorization', `Bearer ${token}`)
-    // .expect((res) => {
-    //   expect(res.body.message).toBe('Forbidden');
-    // });
+  // DELETE
+  it('should return 401 unauthorized when deleting user data', async () => {
+    const { token, payload } = await loginAsUserOrAdmin('user');
 
-    console.log(user.body);
+    const user = await request(app.getHttpServer())
+      .delete(`/users/${payload._id}`)
+      .expect(401)
+      .expect((res) => {
+        expect(res.body.message).toBe('Unauthorized');
+      });
+
+    return user;
+  });
+
+  it('should return 403 forbidden when user deleting other user data', async () => {
+    // create another user
+    const anotherUser = await createUser(userPayload.newUser);
+
+    console.log(anotherUser._id.toString());
+
+    // Login as user
+    const { token } = await loginAsUserOrAdmin('user');
+
+    // Login as admin
+    const { payload } = await loginAsUserOrAdmin('admin');
+
+    // Try to delete admin data
+    const user = await request(app.getHttpServer())
+      .delete(`/users/${anotherUser._id.toString()}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403);
     return user;
   });
 
   it('should return 404 if user not found', async () => {
+    // Login as user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    // delete user
+    await deleteUser(null, payload.email);
+
     const user = await request(app.getHttpServer())
-      .get(`/users/${mockUser._id}`)
+      .delete(`/users/${payload._id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404)
       .expect((res) => {
         expect(res.body.message).toBe('User not found');
       });
 
-    console.log(user.body);
+    return user;
+  });
+
+  it('should return 200 when deleting user data', async () => {
+    // Login as user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    const user = await request(app.getHttpServer())
+      .delete(`/users/${payload._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
 
     return user;
   });
+
+  // UPDATE
 });

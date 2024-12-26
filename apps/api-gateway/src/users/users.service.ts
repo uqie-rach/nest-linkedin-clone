@@ -74,7 +74,6 @@ export class UsersService {
   }
 
   async findOne(params: FindOneDto) {
-    console.log('[findOne] params', params);
     try {
       const response = await firstValueFrom(
         this.usersClient.send('users.findOne', params),

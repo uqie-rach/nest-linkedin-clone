@@ -103,8 +103,6 @@ export class UsersService {
       where: { email: createUserDto.email },
     });
 
-    console.log(isUserExist);
-
     if (isUserExist) {
       throw new RpcException(new ConflictException('User already exists'));
     }
@@ -142,8 +140,6 @@ export class UsersService {
         'role',
       ],
     });
-
-    console.log(user)
     } else {
       user = await this.userRepository.findOne({
         where: { _id: new ObjectId(query.id) },
