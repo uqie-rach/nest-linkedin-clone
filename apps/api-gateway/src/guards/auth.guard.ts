@@ -20,6 +20,8 @@ export class AuthGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
+    console.log(request.params)
+
     if (!token) {
       console.log('[AuthGuard] No token found');
       throw new UnauthorizedException();
@@ -29,6 +31,10 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
+
+      if (payload.role !== 'admin' && request.params.id !== payload.id) {
+        throw new ForbiddenException();
+      }
 
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
