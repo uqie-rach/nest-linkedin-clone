@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -9,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 
@@ -75,5 +77,4 @@ export class UsersController {
   delete(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
-}
-9;
+};
