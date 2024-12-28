@@ -552,4 +552,59 @@ describe('Users Microservice - E2E Users Endpoint Test', () => {
   });
 
   // UPDATE
+  it('should return 200 when updating user data', async () => {
+    // Login as user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    const user = await request(app.getHttpServer())
+      .put(`/users/${payload._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    return user;
+  });
+
+  it('should return 401 - unauthorized user', async () => {
+    // Login as user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    const user = await request(app.getHttpServer())
+      .put(`/users/${payload._id}`)
+      .expect(401);
+
+    return user;
+  });
+
+  it('should return 403 - Forbidden when accessing other data', async () => {
+    // create another user
+    const anotherUser = await createUser(userPayload.newUser);
+
+    // Login as user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    const user = await request(app.getHttpServer())
+      .put(`/users/${anotherUser._id.toString()}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403);
+
+    return user;
+  });
+
+  it('should return 404 - User not found', async () => {
+    // Login as user
+    const { token, payload } = await loginAsUserOrAdmin('user');
+
+    // delete user
+    await deleteUser(null, payload.email);
+
+    const user = await request(app.getHttpServer())
+      .put(`/users/${payload._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.message).toBe('User not found');
+      });
+
+    return user;
+  });
 });
